@@ -8,3 +8,6 @@ exercism-mentoring-request-notifier
 
 # Config
 config.json
+
+# Log
+log/
