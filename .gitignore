@@ -1,0 +1,10 @@
+# IntelliJ IDEA
+.idea/
+
+# Binaries
+bin/
+exercism-mentoring-request-notifier
+*.exe
+
+# Config
+config.json

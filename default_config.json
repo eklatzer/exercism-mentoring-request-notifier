@@ -1,0 +1,9 @@
+{
+  "track_slug": "go",
+  "log_level": "info",
+  "interval": 5,
+  "exercism_token": "<YOUR_EXERCISM_TOKEN>",
+  "channel_id": "<SLACK_CHANNEL_ID>",
+  "slack_token": "<YOUR_SLACK_TOKEN>",
+  "thread_ts": "<SLACK_THREAD_TS>"
+}
