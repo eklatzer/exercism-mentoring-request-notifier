@@ -13,7 +13,7 @@ exercism-mentoring-request-notifier [flags]
 
 ## Config
 
-````json
+````
 {
   "track_slug": "go",                         //check out https://exercism.org/api/v2/tracks for further slugs
   "log_level": "info",                        //details about log-levels: https://github.com/sirupsen/logrus#level-logging
