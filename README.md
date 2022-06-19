@@ -22,7 +22,7 @@ $ docker build -t exercism-mentoring-request-notifier .
 Run container:
 
 ````console
-$ docker run -v /path/to/config.json:/go/src/exercism-mentoring-request-notifier/config.json exercism-mentoring-request-notifier
+$ docker run -d -v /path/to/config.json:/go/src/exercism-mentoring-request-notifier/config.json exercism-mentoring-request-notifier
 ````
 
 ## Config
