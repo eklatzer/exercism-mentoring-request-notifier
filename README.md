@@ -7,8 +7,10 @@ Sends messages to Slack threads when new mentoring requests are created for a ce
 ````
 exercism-mentoring-request-notifier [flags]
 
-  -config string
-        Defines the path to the config (default "config.json")
+    -cache string
+            Defines the path to the cache.json (default "cache.json")
+    -config string
+            Defines the path to the config (default "config.json")
 ````
 
 ## Docker
