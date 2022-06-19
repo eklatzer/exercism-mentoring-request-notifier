@@ -1,6 +1,6 @@
 # Exercism Mentoring Request Notifier
 
-Sends messages to Slack threads when new mentoring requests are created for a certain track.
+Sends messages to Slack threads when new mentoring requests are created and also creates a reminder if the mentoring request is not accepted after a while.
 
 ## Usage
 
