@@ -4,7 +4,7 @@ import (
 	"exercism-mentoring-request-notifier/collector"
 	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/distributor"
-	"exercism-mentoring-request-notifier/mentoring_request"
+	"exercism-mentoring-request-notifier/request"
 	"flag"
 	log "github.com/sirupsen/logrus"
 )

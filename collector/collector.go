@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/logging"
-	"exercism-mentoring-request-notifier/mentoring_request"
+	"exercism-mentoring-request-notifier/request"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"

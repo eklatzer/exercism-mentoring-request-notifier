@@ -5,7 +5,7 @@ import (
 	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/files"
 	"exercism-mentoring-request-notifier/logging"
-	"exercism-mentoring-request-notifier/mentoring_request"
+	"exercism-mentoring-request-notifier/request"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
@@ -58,17 +58,17 @@ func New(cfg *config.Config, chRequests chan map[string][]request.MentoringReque
 func (d *Distributor) Run() {
 	for currentMentoringRequests := range d.chanRequests {
 		for trackSlug, mentoringRequests := range currentMentoringRequests {
-			for _, request := range mentoringRequests {
-				if _, alreadySent := d.distributedRequests[request.UUID]; alreadySent {
+			for _, req := range mentoringRequests {
+				if _, alreadySent := d.distributedRequests[req.UUID]; alreadySent {
 					continue
 				}
-				err := d.sendSlackMessage(request, d.config.TrackConfig[trackSlug])
+				err := d.sendSlackMessage(req, d.config.TrackConfig[trackSlug])
 				if err != nil {
 					d.log.Error(err)
 					continue
 				}
-				d.log.Info("sent message: ", request.UUID)
-				d.distributedRequests[request.UUID] = request
+				d.log.Info("sent message: ", req.UUID)
+				d.distributedRequests[req.UUID] = req
 			}
 		}
 		d.distributedRequests.CleanUp(currentMentoringRequests)
@@ -98,8 +98,8 @@ func (d distributedRequestCache) CleanUp(currentRequest map[string][]request.Men
 outerLoop:
 	for _, alreadyDistributedRequest := range d {
 		for _, requestsForLanguageTrack := range currentRequest {
-			for _, request := range requestsForLanguageTrack {
-				if request.UUID == alreadyDistributedRequest.UUID {
+			for _, req := range requestsForLanguageTrack {
+				if req.UUID == alreadyDistributedRequest.UUID {
 					continue outerLoop
 				}
 			}
