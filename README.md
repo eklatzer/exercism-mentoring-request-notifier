@@ -11,6 +11,20 @@ exercism-mentoring-request-notifier [flags]
         Defines the path to the config (default "config.json")
 ````
 
+## Docker
+
+Build the image:
+
+```console
+$ docker build -t exercism-mentoring-request-notifier .
+```
+
+Run container:
+
+````console
+$ docker run -v /path/to/config.json:/go/src/exercism-mentoring-request-notifier/config.json exercism-mentoring-request-notifier
+````
+
 ## Config
 
 ````

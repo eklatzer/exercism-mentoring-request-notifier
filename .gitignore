@@ -8,9 +8,18 @@ exercism-mentoring-request-notifier
 
 # Config
 config.json
+default_config.json
 
 # Log
 log/
 
 # Cache
 cache.json
+
+# README
+README.md
+
+# Git
+.gitignore
+.git/
+
