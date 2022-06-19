@@ -3,6 +3,7 @@
   "interval": 5,
   "exercism_token": "<YOUR_EXERCISM_TOKEN>",
   "slack_token": "<YOUR_SLACK_TOKEN>",
+  "remind_interval": "6h",
   "track_config": {
     "go": {
       "thread_ts": "<SLACK_THREAD_TS>",

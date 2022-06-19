@@ -11,6 +11,7 @@ import (
 	"github.com/slack-go/slack"
 	"io/ioutil"
 	"os"
+	"time"
 )
 
 const (
@@ -24,9 +25,15 @@ type Distributor struct {
 	distributedRequests distributedRequestCache
 	slackClient         *slack.Client
 	cacheFilePath       string
+	remindInterval      time.Duration
 }
 
-type distributedRequestCache map[string]request.MentoringRequest
+type distributedRequestCache map[string]messageInfo
+
+type messageInfo struct {
+	Request  request.MentoringRequest `json:"request"`
+	LastSent time.Time                `json:"last_sent"`
+}
 
 func New(cfg *config.Config, chRequests chan map[string][]request.MentoringRequest, cacheFilePath string) (*Distributor, error) {
 	var d = &Distributor{
@@ -39,6 +46,11 @@ func New(cfg *config.Config, chRequests chan map[string][]request.MentoringReque
 	}
 
 	err := logging.SetupLogging(d.log, cfg.LogLevel, logFile)
+	if err != nil {
+		return nil, err
+	}
+
+	d.remindInterval, err = time.ParseDuration(cfg.RemindInterval)
 	if err != nil {
 		return nil, err
 	}
@@ -59,16 +71,24 @@ func (d *Distributor) Run() {
 	for currentMentoringRequests := range d.chanRequests {
 		for trackSlug, mentoringRequests := range currentMentoringRequests {
 			for _, req := range mentoringRequests {
-				if _, alreadySent := d.distributedRequests[req.UUID]; alreadySent {
+				info, alreadySent := d.distributedRequests[req.UUID]
+				var message = "New mentoring request"
+				if alreadySent {
+					message = "Reminder"
+				}
+				if alreadySent && time.Now().Sub(info.LastSent) < d.remindInterval {
 					continue
 				}
-				err := d.sendSlackMessage(req, d.config.TrackConfig[trackSlug])
+				err := d.sendSlackMessage(req, d.config.TrackConfig[trackSlug], message)
 				if err != nil {
 					d.log.Error(err)
 					continue
 				}
 				d.log.Info("sent message: ", req.UUID)
-				d.distributedRequests[req.UUID] = req
+				d.distributedRequests[req.UUID] = messageInfo{
+					Request:  req,
+					LastSent: time.Now(),
+				}
 			}
 		}
 		d.distributedRequests.CleanUp(currentMentoringRequests)
@@ -80,9 +100,9 @@ func (d *Distributor) Run() {
 	}
 }
 
-func (d Distributor) sendSlackMessage(request request.MentoringRequest, trackConfig config.TrackConfig) error {
+func (d Distributor) sendSlackMessage(request request.MentoringRequest, trackConfig config.TrackConfig, message string) error {
 	attachment := slack.Attachment{
-		Pretext: "New mentoring request",
+		Pretext: message,
 		Text:    fmt.Sprintf("%s: %s", request.UUID, request.URL),
 	}
 
@@ -99,12 +119,12 @@ outerLoop:
 	for _, alreadyDistributedRequest := range d {
 		for _, requestsForLanguageTrack := range currentRequest {
 			for _, req := range requestsForLanguageTrack {
-				if req.UUID == alreadyDistributedRequest.UUID {
+				if req.UUID == alreadyDistributedRequest.Request.UUID {
 					continue outerLoop
 				}
 			}
 		}
-		delete(d, alreadyDistributedRequest.UUID)
+		delete(d, alreadyDistributedRequest.Request.UUID)
 	}
 }
 

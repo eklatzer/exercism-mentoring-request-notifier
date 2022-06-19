@@ -3,11 +3,12 @@ package config
 import "exercism-mentoring-request-notifier/files"
 
 type Config struct {
-	LogLevel      string                 `json:"log_level"`
-	Interval      int                    `json:"interval"`
-	ExercismToken string                 `json:"exercism_token"`
-	SlackToken    string                 `json:"slack_token"`
-	TrackConfig   map[string]TrackConfig `json:"track_config"`
+	LogLevel       string                 `json:"log_level"`
+	Interval       int                    `json:"interval"`
+	ExercismToken  string                 `json:"exercism_token"`
+	SlackToken     string                 `json:"slack_token"`
+	TrackConfig    map[string]TrackConfig `json:"track_config"`
+	RemindInterval string                 `json:"remind_interval"`
 }
 
 type TrackConfig struct {
