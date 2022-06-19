@@ -21,9 +21,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to read config: %v", err)
 	}
-	for i, c := range cfg.TrackConfig {
-		log.Println(i, ":", c.ChannelID)
-	}
 
 	var chMentoringRequests = make(chan map[string][]mentoring_request.MentoringRequest, 5)
 
