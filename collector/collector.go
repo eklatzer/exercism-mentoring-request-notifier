@@ -63,14 +63,14 @@ func (c *ExercismHttpClient) getAllMentoringRequests(trackSlug string) ([]mentor
 			return nil, err
 		}
 		mentoringRequest = append(mentoringRequest, requests.MentoringRequests...)
-		if i == requests.Meta.TotalPages {
+		if i >= requests.Meta.TotalPages {
 			break
 		}
 	}
 	return mentoringRequest, nil
 }
 
-func (c *ExercismHttpClient) getMentoringRequests(trackSlug string, page int) (mentoring_request.MentoringRequestsResults, error) {
+func (c *ExercismHttpClient) getMentoringRequests(trackSlug string, page int) (*mentoring_request.MentoringRequestsResults, error) {
 	requestURL := fmt.Sprintf("%s%s", exercismAPIBasePath, fmt.Sprintf(getMentoringRequestsPath, trackSlug, page))
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
@@ -97,5 +97,6 @@ func (c *ExercismHttpClient) getMentoringRequests(trackSlug string, page int) (m
 	if err != nil {
 		return nil, err
 	}
+
 	return data, nil
 }
