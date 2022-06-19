@@ -7,8 +7,9 @@ exercism-mentoring-request-notifier
 *.exe
 
 # Config
-config.json
 default_config.json
+stage-config.json
+dev-config.json
 
 # Log
 log/

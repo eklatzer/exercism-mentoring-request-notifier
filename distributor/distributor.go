@@ -72,9 +72,9 @@ func (d *Distributor) Run() {
 		for trackSlug, mentoringRequests := range currentMentoringRequests {
 			for _, req := range mentoringRequests {
 				info, alreadySent := d.distributedRequests[req.UUID]
-				var message = "New mentoring request"
+				var message = "*New mentoring request*"
 				if alreadySent {
-					message = "Reminder"
+					message = "*Reminder*"
 				}
 				if alreadySent && time.Now().Sub(info.LastSent) < d.remindInterval {
 					continue
@@ -103,10 +103,15 @@ func (d *Distributor) Run() {
 func (d Distributor) sendSlackMessage(request request.MentoringRequest, trackConfig config.TrackConfig, message string) error {
 	attachment := slack.Attachment{
 		Pretext: message,
-		Text:    fmt.Sprintf("%s: %s", request.UUID, request.URL),
+		Text:    fmt.Sprintf("<%s|Get to request>", request.URL),
+		Fields: []slack.AttachmentField{
+			{Title: "Student", Value: request.StudentHandle},
+			{Title: "Exercise", Value: request.ExerciseTitle},
+		},
+		Color: "#604FCD",
 	}
 
-	_, _, err := d.slackClient.PostMessage(
+	_, _, _, err := d.slackClient.SendMessage(
 		trackConfig.ChannelID,
 		slack.MsgOptionAttachments(attachment),
 		slack.MsgOptionTS(trackConfig.ThreadTS),
