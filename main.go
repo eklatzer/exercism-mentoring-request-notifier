@@ -24,7 +24,7 @@ func main() {
 		log.Fatalf("failed to read config: %v", err)
 	}
 
-	var chMentoringRequests = make(chan map[string][]mentoring_request.MentoringRequest, 5)
+	var chMentoringRequests = make(chan map[string][]request.MentoringRequest, 5)
 
 	col, err := collector.New(cfg, chMentoringRequests)
 	if err != nil {

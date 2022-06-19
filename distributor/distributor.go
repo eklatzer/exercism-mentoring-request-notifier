@@ -19,16 +19,16 @@ const (
 
 type Distributor struct {
 	config              *config.Config
-	chanRequests        chan map[string][]mentoring_request.MentoringRequest
+	chanRequests        chan map[string][]request.MentoringRequest
 	log                 *logrus.Logger
 	distributedRequests distributedRequestCache
 	slackClient         *slack.Client
 	cacheFilePath       string
 }
 
-type distributedRequestCache map[string]mentoring_request.MentoringRequest
+type distributedRequestCache map[string]request.MentoringRequest
 
-func New(cfg *config.Config, chRequests chan map[string][]mentoring_request.MentoringRequest, cacheFilePath string) (*Distributor, error) {
+func New(cfg *config.Config, chRequests chan map[string][]request.MentoringRequest, cacheFilePath string) (*Distributor, error) {
 	var d = &Distributor{
 		config:              cfg,
 		chanRequests:        chRequests,
@@ -39,6 +39,9 @@ func New(cfg *config.Config, chRequests chan map[string][]mentoring_request.Ment
 	}
 
 	err := logging.SetupLogging(d.log, cfg.LogLevel, logFile)
+	if err != nil {
+		return nil, err
+	}
 
 	err = createCacheFileIfNotExists(cacheFilePath)
 	if err != nil {
@@ -77,7 +80,7 @@ func (d *Distributor) Run() {
 	}
 }
 
-func (d Distributor) sendSlackMessage(request mentoring_request.MentoringRequest, trackConfig config.TrackConfig) error {
+func (d Distributor) sendSlackMessage(request request.MentoringRequest, trackConfig config.TrackConfig) error {
 	attachment := slack.Attachment{
 		Pretext: "New mentoring request",
 		Text:    fmt.Sprintf("%s: %s", request.UUID, request.URL),
@@ -91,7 +94,7 @@ func (d Distributor) sendSlackMessage(request mentoring_request.MentoringRequest
 	return err
 }
 
-func (d distributedRequestCache) CleanUp(currentRequest map[string][]mentoring_request.MentoringRequest) {
+func (d distributedRequestCache) CleanUp(currentRequest map[string][]request.MentoringRequest) {
 outerLoop:
 	for _, alreadyDistributedRequest := range d {
 		for _, requestsForLanguageTrack := range currentRequest {

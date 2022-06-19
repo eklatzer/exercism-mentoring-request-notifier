@@ -1,4 +1,4 @@
-package mentoring_request
+package request
 
 import (
 	"time"
