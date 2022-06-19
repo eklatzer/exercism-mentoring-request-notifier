@@ -14,8 +14,7 @@ import (
 )
 
 const (
-	logFile   = "distributor_log.json"
-	cacheFile = "cache.json"
+	logFile = "distributor_log.json"
 )
 
 type Distributor struct {
@@ -24,27 +23,29 @@ type Distributor struct {
 	log                 *logrus.Logger
 	distributedRequests distributedRequestCache
 	slackClient         *slack.Client
+	cacheFilePath       string
 }
 
 type distributedRequestCache map[string]mentoring_request.MentoringRequest
 
-func New(cfg *config.Config, chRequests chan map[string][]mentoring_request.MentoringRequest) (*Distributor, error) {
+func New(cfg *config.Config, chRequests chan map[string][]mentoring_request.MentoringRequest, cacheFilePath string) (*Distributor, error) {
 	var d = &Distributor{
 		config:              cfg,
 		chanRequests:        chRequests,
 		log:                 &logrus.Logger{},
 		distributedRequests: distributedRequestCache{},
 		slackClient:         slack.New(cfg.SlackToken),
+		cacheFilePath:       cacheFilePath,
 	}
 
 	err := logging.SetupLogging(d.log, cfg.LogLevel, logFile)
 
-	err = createCacheFileIfNotExists()
+	err = createCacheFileIfNotExists(cacheFilePath)
 	if err != nil {
 		return nil, err
 	}
 
-	err = files.JSONToStruct(cacheFile, &d.distributedRequests)
+	err = files.JSONToStruct(d.cacheFilePath, &d.distributedRequests)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +70,7 @@ func (d *Distributor) Run() {
 		}
 		d.distributedRequests.CleanUp(currentMentoringRequests)
 
-		err := d.distributedRequests.SaveToFile()
+		err := d.distributedRequests.SaveToFile(d.cacheFilePath)
 		if err != nil {
 			d.log.Error(err)
 		}
@@ -125,23 +126,23 @@ outerLoop:
 	}
 }
 
-func (d distributedRequestCache) SaveToFile() error {
+func (d distributedRequestCache) SaveToFile(cacheFilePath string) error {
 	file, err := json.Marshal(d)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(cacheFile, file, 0644)
+	return ioutil.WriteFile(cacheFilePath, file, 0644)
 }
 
-func createCacheFileIfNotExists() error {
-	_, err := os.Stat(cacheFile)
+func createCacheFileIfNotExists(cacheFilePath string) error {
+	_, err := os.Stat(cacheFilePath)
 	if os.IsNotExist(err) {
 		marshal, err := json.Marshal(distributedRequestCache{})
 		if err != nil {
 			return err
 		}
 
-		err = ioutil.WriteFile(cacheFile, marshal, 0644)
+		err = ioutil.WriteFile(cacheFilePath, marshal, 0644)
 		if err != nil {
 			return err
 		}

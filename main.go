@@ -11,10 +11,12 @@ import (
 
 const (
 	defaultConfigPath = "config.json"
+	defaultCachePath  = "cache.json"
 )
 
 func main() {
 	configPath := flag.String("config", defaultConfigPath, "Defines the path to the config")
+	cacheFilePath := flag.String("cache", defaultCachePath, "Defines the path to the cache.json")
 	flag.Parse()
 
 	cfg, err := config.ReadConfig(*configPath)
@@ -31,7 +33,7 @@ func main() {
 
 	go col.Run()
 
-	dist, err := distributor.New(cfg, chMentoringRequests)
+	dist, err := distributor.New(cfg, chMentoringRequests, *cacheFilePath)
 	if err != nil {
 		log.Fatalf("failed to setup distributor: %v", err)
 	}
