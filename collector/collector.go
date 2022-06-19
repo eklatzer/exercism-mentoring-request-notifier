@@ -14,7 +14,7 @@ import (
 
 const (
 	exercismAPIBasePath      = "https://exercism.org/api/v2"
-	getMentoringRequestsPath = "/mentoring/requests?track_slug=%s"
+	getMentoringRequestsPath = "/mentoring/requests?track_slug=%s&page=%d&order=recent"
 	logFile                  = "collector_log.json"
 )
 
@@ -44,20 +44,34 @@ func (d *Collector) Run() {
 		time.Sleep(time.Duration(d.config.Interval) * time.Second)
 		var results = map[string][]mentoring_request.MentoringRequest{}
 		for trackSlug := range d.config.TrackConfig {
-			requests, err := httpClient.getMentoringRequests(trackSlug)
+			requests, err := httpClient.getAllMentoringRequests(trackSlug)
 			if err != nil {
 				d.log.Error(err)
 				continue
 			}
-			results[trackSlug] = requests.MentoringRequests
+			results[trackSlug] = requests
 		}
 		d.chanRequests <- results
 	}
 }
 
-func (c *ExercismHttpClient) getMentoringRequests(trackSlug string) (*mentoring_request.MentoringRequestsResults, error) {
-	//TODO: pagination
-	requestURL := fmt.Sprintf("%s%s", exercismAPIBasePath, fmt.Sprintf(getMentoringRequestsPath, trackSlug))
+func (c *ExercismHttpClient) getAllMentoringRequests(trackSlug string) ([]mentoring_request.MentoringRequest, error) {
+	var mentoringRequest []mentoring_request.MentoringRequest
+	for i := 1; true; i++ {
+		requests, err := c.getMentoringRequests(trackSlug, i)
+		if err != nil {
+			return nil, err
+		}
+		mentoringRequest = append(mentoringRequest, requests.MentoringRequests...)
+		if i == requests.Meta.TotalPages {
+			break
+		}
+	}
+	return mentoringRequest, nil
+}
+
+func (c *ExercismHttpClient) getMentoringRequests(trackSlug string, page int) (mentoring_request.MentoringRequestsResults, error) {
+	requestURL := fmt.Sprintf("%s%s", exercismAPIBasePath, fmt.Sprintf(getMentoringRequestsPath, trackSlug, page))
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new request: %w", err)
