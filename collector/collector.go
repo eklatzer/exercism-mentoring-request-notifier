@@ -36,7 +36,7 @@ func New(cfg *config.Config, chRequests chan map[string][]request.MentoringReque
 }
 
 func (d *Collector) Run() {
-	var httpClient = ExercismHttpClient{
+	var httpClient = ExercismHTTPClient{
 		Client: &http.Client{},
 		Token:  d.config.ExercismToken,
 	}
@@ -55,7 +55,7 @@ func (d *Collector) Run() {
 	}
 }
 
-func (c *ExercismHttpClient) getAllMentoringRequests(trackSlug string) ([]request.MentoringRequest, error) {
+func (c *ExercismHTTPClient) getAllMentoringRequests(trackSlug string) ([]request.MentoringRequest, error) {
 	var mentoringRequest []request.MentoringRequest
 	for i := 1; true; i++ {
 		requests, err := c.getMentoringRequests(trackSlug, i)
@@ -70,7 +70,7 @@ func (c *ExercismHttpClient) getAllMentoringRequests(trackSlug string) ([]reques
 	return mentoringRequest, nil
 }
 
-func (c *ExercismHttpClient) getMentoringRequests(trackSlug string, page int) (*request.MentoringRequestsResults, error) {
+func (c *ExercismHTTPClient) getMentoringRequests(trackSlug string, page int) (*request.MentoringRequestsResults, error) {
 	requestURL := fmt.Sprintf("%s%s", exercismAPIBasePath, fmt.Sprintf(getMentoringRequestsPath, trackSlug, page))
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {

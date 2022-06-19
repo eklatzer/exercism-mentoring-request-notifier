@@ -2,7 +2,7 @@ package collector
 
 import "net/http"
 
-type ExercismHttpClient struct {
+type ExercismHTTPClient struct {
 	Client *http.Client
 	Token  string
 }

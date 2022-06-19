@@ -82,7 +82,7 @@ func (d *Distributor) Run() {
 				if alreadySent {
 					message = "*Reminder*"
 				}
-				if alreadySent && time.Now().Sub(info.LastSent) < d.remindInterval {
+				if alreadySent && time.Since(info.LastSent) < d.remindInterval {
 					continue
 				}
 				messageTimestamp, err := d.sendSlackMessage(req, d.config.TrackConfig[trackSlug], message)
