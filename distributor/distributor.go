@@ -100,13 +100,12 @@ func (d *Distributor) Run() {
 	}
 }
 
-func (d Distributor) sendSlackMessage(request request.MentoringRequest, trackConfig config.TrackConfig, message string) error {
+func (d Distributor) sendSlackMessage(req request.MentoringRequest, trackConfig config.TrackConfig, message string) error {
 	attachment := slack.Attachment{
-		Pretext: message,
-		Text:    fmt.Sprintf("<%s|Get to request>", request.URL),
+		Text: fmt.Sprintf("%s: <%s|Get to request>", message, req.URL),
 		Fields: []slack.AttachmentField{
-			{Title: "Student", Value: request.StudentHandle},
-			{Title: "Exercise", Value: request.ExerciseTitle},
+			{Title: "Student", Value: req.StudentHandle},
+			{Title: "Exercise", Value: req.ExerciseTitle},
 		},
 		Color: "#604FCD",
 	}
