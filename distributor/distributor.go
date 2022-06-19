@@ -75,27 +75,6 @@ func (d *Distributor) Run() {
 			d.log.Error(err)
 		}
 	}
-
-	/*	for requests := range d.chanRequests {
-		for _, request := range requests {
-			if _, alreadySent := d.distributedRequests[request.UUID]; !alreadySent {
-				err := d.sendSlackMessage(request)
-				if err != nil {
-					d.log.Error(err)
-					continue
-				}
-				d.log.Info("sent message: ", request.UUID)
-				d.distributedRequests[request.UUID] = request
-			}
-		}
-
-		d.distributedRequests.CleanUp(requests)
-
-		err := d.distributedRequests.SaveToFile()
-		if err != nil {
-			d.log.Error(err)
-		}
-	}*/
 }
 
 func (d Distributor) sendSlackMessage(request mentoring_request.MentoringRequest, trackConfig config.TrackConfig) error {
