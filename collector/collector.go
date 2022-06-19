@@ -20,11 +20,11 @@ const (
 
 type Collector struct {
 	config       *config.Config
-	chanRequests chan []mentoring_request.MentoringRequest
+	chanRequests chan map[string][]mentoring_request.MentoringRequest
 	log          *logrus.Logger
 }
 
-func New(cfg *config.Config, chRequests chan []mentoring_request.MentoringRequest) (*Collector, error) {
+func New(cfg *config.Config, chRequests chan map[string][]mentoring_request.MentoringRequest) (*Collector, error) {
 	var c = &Collector{
 		config:       cfg,
 		chanRequests: chRequests,
@@ -42,16 +42,21 @@ func (d *Collector) Run() {
 	}
 	for true {
 		time.Sleep(time.Duration(d.config.Interval) * time.Second)
-		requests, err := httpClient.getMentoringRequests(d.config.TrackSlug)
-		if err != nil {
-			d.log.Error(err)
-			continue
+		var results = map[string][]mentoring_request.MentoringRequest{}
+		for trackSlug := range d.config.TrackConfig {
+			requests, err := httpClient.getMentoringRequests(trackSlug)
+			if err != nil {
+				d.log.Error(err)
+				continue
+			}
+			results[trackSlug] = requests.MentoringRequests
 		}
-		d.chanRequests <- requests.MentoringRequests
+		d.chanRequests <- results
 	}
 }
 
 func (c *ExercismHttpClient) getMentoringRequests(trackSlug string) (*mentoring_request.MentoringRequestsResults, error) {
+	//TODO: pagination
 	requestURL := fmt.Sprintf("%s%s", exercismAPIBasePath, fmt.Sprintf(getMentoringRequestsPath, trackSlug))
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {

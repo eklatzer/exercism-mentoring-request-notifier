@@ -1,17 +1,18 @@
 package config
 
-import (
-	"exercism-mentoring-request-notifier/files"
-)
+import "exercism-mentoring-request-notifier/files"
 
 type Config struct {
-	TrackSlug     string `json:"track_slug"`
-	LogLevel      string `json:"log_level"`
-	Interval      int    `json:"interval"`
-	ExercismToken string `json:"exercism_token"`
-	ChannelID     string `json:"channel_id"`
-	SlackToken    string `json:"slack_token"`
-	ThreadTS      string `json:"thread_ts"`
+	LogLevel      string                 `json:"log_level"`
+	Interval      int                    `json:"interval"`
+	ExercismToken string                 `json:"exercism_token"`
+	SlackToken    string                 `json:"slack_token"`
+	TrackConfig   map[string]TrackConfig `json:"track_config"`
+}
+
+type TrackConfig struct {
+	ThreadTS  string `json:"thread_ts"`
+	ChannelID string `json:"channel_id"`
 }
 
 func ReadConfig(path string) (*Config, error) {
