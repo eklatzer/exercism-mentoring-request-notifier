@@ -28,11 +28,17 @@ type Distributor struct {
 	remindInterval      time.Duration
 }
 
-type distributedRequestCache map[string]messageInfo
+type distributedRequestCache map[string]requestInfo
 
-type messageInfo struct {
+type requestInfo struct {
 	Request  request.MentoringRequest `json:"request"`
 	LastSent time.Time                `json:"last_sent"`
+	Messages []messageInfo            `json:"messages"`
+}
+
+type messageInfo struct {
+	ChannelID string `json:"channel_id"`
+	Timestamp string `json:"timestamp"`
 }
 
 func New(cfg *config.Config, chRequests chan map[string][]request.MentoringRequest, cacheFilePath string) (*Distributor, error) {
@@ -79,19 +85,26 @@ func (d *Distributor) Run() {
 				if alreadySent && time.Now().Sub(info.LastSent) < d.remindInterval {
 					continue
 				}
-				err := d.sendSlackMessage(req, d.config.TrackConfig[trackSlug], message)
+				messageTimestamp, err := d.sendSlackMessage(req, d.config.TrackConfig[trackSlug], message)
 				if err != nil {
 					d.log.Error(err)
 					continue
 				}
 				d.log.Info("sent message: ", req.UUID)
-				d.distributedRequests[req.UUID] = messageInfo{
+				d.distributedRequests[req.UUID] = requestInfo{
 					Request:  req,
 					LastSent: time.Now(),
+					Messages: append(d.distributedRequests[req.UUID].Messages, messageInfo{
+						ChannelID: d.config.TrackConfig[trackSlug].ChannelID,
+						Timestamp: messageTimestamp,
+					}),
 				}
 			}
 		}
-		d.distributedRequests.CleanUp(currentMentoringRequests)
+		errors := d.distributedRequests.CleanUp(currentMentoringRequests, d.slackClient)
+		for _, err := range errors {
+			d.log.Warnf("failed to delete message:%s", err.Error())
+		}
 
 		err := d.distributedRequests.SaveToFile(d.cacheFilePath)
 		if err != nil {
@@ -100,7 +113,7 @@ func (d *Distributor) Run() {
 	}
 }
 
-func (d Distributor) sendSlackMessage(req request.MentoringRequest, trackConfig config.TrackConfig, message string) error {
+func (d Distributor) sendSlackMessage(req request.MentoringRequest, trackConfig config.TrackConfig, message string) (string, error) {
 	attachment := slack.Attachment{
 		Text: fmt.Sprintf("%s: <%s|Get to request>", message, req.URL),
 		Fields: []slack.AttachmentField{
@@ -110,15 +123,16 @@ func (d Distributor) sendSlackMessage(req request.MentoringRequest, trackConfig 
 		Color: "#604FCD",
 	}
 
-	_, _, _, err := d.slackClient.SendMessage(
+	_, messageTimestamp, _, err := d.slackClient.SendMessage(
 		trackConfig.ChannelID,
 		slack.MsgOptionAttachments(attachment),
 		slack.MsgOptionTS(trackConfig.ThreadTS),
 	)
-	return err
+	return messageTimestamp, err
 }
 
-func (d distributedRequestCache) CleanUp(currentRequest map[string][]request.MentoringRequest) {
+func (d distributedRequestCache) CleanUp(currentRequest map[string][]request.MentoringRequest, slackClient *slack.Client) []error {
+	var errors []error
 outerLoop:
 	for _, alreadyDistributedRequest := range d {
 		for _, requestsForLanguageTrack := range currentRequest {
@@ -128,8 +142,22 @@ outerLoop:
 				}
 			}
 		}
+		err := alreadyDistributedRequest.deleteMessages(slackClient)
+		errors = append(errors, err...)
 		delete(d, alreadyDistributedRequest.Request.UUID)
 	}
+	return errors
+}
+
+func (r requestInfo) deleteMessages(client *slack.Client) []error {
+	var errors []error
+	for _, message := range r.Messages {
+		_, _, err := client.DeleteMessage(message.ChannelID, message.Timestamp)
+		if err != nil {
+			errors = append(errors, err)
+		}
+	}
+	return errors
 }
 
 func (d distributedRequestCache) SaveToFile(cacheFilePath string) error {
