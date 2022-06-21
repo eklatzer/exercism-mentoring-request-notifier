@@ -32,7 +32,10 @@ jobs:
         run: go install golang.org/x/lint/golint@latest
 
       - name: Run gofmt
-        run: test -z $(gofmt -d .)
+        run: |
+          - if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+              exit 1
+           fi
 
       - name: Run golint
         run: golint -set_exit_status ./...
