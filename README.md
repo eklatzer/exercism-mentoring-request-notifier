@@ -2,9 +2,28 @@
 
 Sends messages to Slack threads when new mentoring requests are created and also creates a reminder if the mentoring request is not accepted after a while.
 
+## Build
+
+`build.sh` can be used to build the current project for multiple platforms. Currently, the tool is build for the following platforms:
+* `darwin/386`
+* `darwin/amd64`
+* `linux/386`
+* `linux/amd64`
+* `linux/arm`
+* `linux/arm64`
+* `windows/386`
+* `windows/amd64`
+* `windows/arm`
+
+### Usage
+
+```console
+$ build.sh <package-name>
+```
+
 ## Usage
 
-````
+````console
 exercism-mentoring-request-notifier [flags]
 
     -cache string
