@@ -4,7 +4,7 @@ Sends messages to Slack threads when new mentoring requests are created and also
 
 ## Build
 
-`build.sh` can be used to build the current project for multiple platforms. Currently, the tool is build for the following platforms:
+`build.sh` can be used to build the current project for multiple platforms. The binaries can then be found at `./bin`. Currently, the tool is build for the following platforms:
 * `darwin/386`
 * `darwin/amd64`
 * `linux/386`
