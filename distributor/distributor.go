@@ -95,7 +95,7 @@ func (d *Distributor) Run() {
 func (d Distributor) StartupCheck() error {
 	for trackSlug, trackConfig := range d.config.TrackConfig {
 		_, err := d.sendSlackMessage(trackConfig, slack.Attachment{
-			Text:  fmt.Sprintf("Start of mentoring request notifer (Slug: %s)", trackSlug),
+			Text:  fmt.Sprintf("Start of mentoring request notifer for `%s`", trackSlug),
 			Color: exercismColorCode,
 		})
 		if err != nil {
