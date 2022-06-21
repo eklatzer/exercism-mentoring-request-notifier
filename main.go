@@ -4,6 +4,7 @@ import (
 	"exercism-mentoring-request-notifier/collector"
 	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/distributor"
+	"exercism-mentoring-request-notifier/logging"
 	"exercism-mentoring-request-notifier/request"
 	"flag"
 	"fmt"
@@ -45,7 +46,7 @@ func main() {
 	}
 	go dist.Run()
 
-	col, err := collector.New(cfg, chMentoringRequests)
+	col, err := collector.New(cfg, chMentoringRequests, logging.SetupLogging)
 	if err != nil {
 		log.Fatalf("failed to setup collector: %v", err)
 	}

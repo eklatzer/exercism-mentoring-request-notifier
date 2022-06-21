@@ -5,11 +5,41 @@ import (
 	"errors"
 	"exercism-mentoring-request-notifier/request"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 )
+
+var testCasesGetMentoringRequestsForAllTracks = []struct {
+	description string
+	getClient   func(results request.MentoringRequestsResults) *ExercismHTTPClient
+	expectError bool
+	result      request.MentoringRequestsResults
+}{
+	{
+		description: "two mentoring requests for go",
+		expectError: false,
+		result: request.MentoringRequestsResults{
+			MentoringRequests: []request.MentoringRequest{
+				{UUID: "e01333ce426b474981391f0566b7a78d", TrackTitle: "C++", ExerciseIconURL: "https://dg8krxphbh767.cloudfront.net/exercises/nth-prime.svg", ExerciseTitle: "Nth Prime", StudentHandle: "Student", StudentAvatarURL: "https://dg8krxphbh767.cloudfront.net/placeholders/user-avatar.svg", UpdatedAt: time.Now().UTC(), HaveMentoredPreviously: false, IsFavorited: false, Status: nil, URL: "https://exercism.org/mentoring/requests/e01333ce426b474981391f0566b7a78d"},
+				{UUID: "f01333ce426b474981391f0566b7a78d", TrackTitle: "C++", ExerciseIconURL: "https://dg8krxphbh767.cloudfront.net/exercises/atbash-cipher.svg", ExerciseTitle: "Atbash Cipher", StudentHandle: "Student", StudentAvatarURL: "https://dg8krxphbh767.cloudfront.net/placeholders/user-avatar.svg", UpdatedAt: time.Now().UTC(), HaveMentoredPreviously: false, IsFavorited: false, Status: nil, URL: "https://exercism.org/mentoring/requests/f01333ce426b474981391f0566b7a78d"},
+			},
+			Meta: request.Meta{CurrentPage: 1, TotalCount: 2, TotalPages: 1, UnscopedTotal: 2},
+		},
+		getClient: func(result request.MentoringRequestsResults) *ExercismHTTPClient {
+			marshal, _ := json.Marshal(result)
+			return &ExercismHTTPClient{Client: &mockClient{expectedURL: "https://exercism.org/api/v2/mentoring/requests?track_slug=go&order=recent&page=", statusCode: http.StatusOK, expectedToken: "3ccb0df8-933c-4985-b1f8-b3c354b81313", responseBody: []io.ReadCloser{io.NopCloser(strings.NewReader(string(marshal)))}}, Token: "3ccb0df8-933c-4985-b1f8-b3c354b81313"}
+		},
+	},
+	{
+		description: "client returns error",
+		expectError: true,
+		result:      request.MentoringRequestsResults{},
+		getClient: func(result request.MentoringRequestsResults) *ExercismHTTPClient {
+			return &ExercismHTTPClient{Client: &mockClient{err: errors.New("test-error")}}
+		},
+	},
+}
 
 var testCasesGetAllMentoringRequests = []struct {
 	description string
@@ -23,7 +53,6 @@ var testCasesGetAllMentoringRequests = []struct {
 		expectError: false,
 		getClient: func(result request.MentoringRequestsResults) *ExercismHTTPClient {
 			json, _ := json.Marshal(result)
-			log.Println(string(json))
 			return &ExercismHTTPClient{Client: &mockClient{expectedURL: "https://exercism.org/api/v2/mentoring/requests?track_slug=go&order=recent&page=", statusCode: http.StatusOK, expectedToken: "3ccb0df8-933c-4985-b1f8-b3c354b81313", responseBody: []io.ReadCloser{io.NopCloser(strings.NewReader(string(json)))}}, Token: "3ccb0df8-933c-4985-b1f8-b3c354b81313"}
 		},
 	},

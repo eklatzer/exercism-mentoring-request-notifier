@@ -1,6 +1,8 @@
 package client
 
 import (
+	"exercism-mentoring-request-notifier/config"
+	"exercism-mentoring-request-notifier/request"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io"
@@ -32,19 +34,27 @@ func (m *mockClient) Do(req *http.Request) (*http.Response, error) {
 		return nil, fmt.Errorf("invalid auth token presented")
 	}
 
-	fmt.Println(m.statusCode)
 	return &http.Response{StatusCode: m.statusCode, Body: m.responseBody[m.requestCount-1]}, nil
+}
+
+func TestGetMentoringRequestsForAllTracks(t *testing.T) {
+	for _, testCase := range testCasesGetMentoringRequestsForAllTracks {
+		mentoringRequestsPerTrack, err := testCase.getClient(testCase.result).GetMentoringRequestsForAllTracks(map[string]config.TrackConfig{"go": {}})
+		if err != nil {
+			return
+		}
+		assertError(t, err, testCase.expectError)
+
+		var expectedResult = map[string][]request.MentoringRequest{"go": testCase.result.MentoringRequests}
+		assert.Equal(t, expectedResult, mentoringRequestsPerTrack)
+	}
 }
 
 func TestGetAllMentoringRequests(t *testing.T) {
 	for _, testCase := range testCasesGetAllMentoringRequests {
 		t.Run(testCase.description, func(t *testing.T) {
-			mentoringRequests, err := testCase.getClient(testCase.result).GetAllMentoringRequests("go")
-			if testCase.expectError {
-				assert.NotNil(t, err)
-			} else {
-				assert.Nil(t, err)
-			}
+			mentoringRequests, err := testCase.getClient(testCase.result).getAllMentoringRequests("go")
+			assertError(t, err, testCase.expectError)
 			assert.Equal(t, testCase.result.MentoringRequests, mentoringRequests)
 		})
 	}
@@ -54,12 +64,16 @@ func TestGetRequest(t *testing.T) {
 	for _, testCase := range testCasesGetRequest {
 		t.Run(testCase.description, func(t *testing.T) {
 			responseBody, err := testCase.client.getRequest(testCase.url)
-			if testCase.expectError {
-				assert.NotNil(t, err)
-			} else {
-				assert.Nil(t, err)
-			}
+			assertError(t, err, testCase.expectError)
 			assert.Equal(t, testCase.expected, responseBody)
 		})
+	}
+}
+
+func assertError(t *testing.T, err error, expectError bool) {
+	if expectError {
+		assert.NotNil(t, err)
+	} else {
+		assert.Nil(t, err)
 	}
 }

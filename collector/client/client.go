@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/request"
 	"fmt"
 	"io"
@@ -22,11 +23,23 @@ type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-func (c *ExercismHTTPClient) GetAllMentoringRequests(trackSlug string) ([]request.MentoringRequest, error) {
+func (client *ExercismHTTPClient) GetMentoringRequestsForAllTracks(trackConfig map[string]config.TrackConfig) (map[string][]request.MentoringRequest, error) {
+	var results = map[string][]request.MentoringRequest{}
+	for trackSlug := range trackConfig {
+		requests, err := client.getAllMentoringRequests(trackSlug)
+		if err != nil {
+			return nil, err
+		}
+		results[trackSlug] = requests
+	}
+	return results, nil
+}
+
+func (client *ExercismHTTPClient) getAllMentoringRequests(trackSlug string) ([]request.MentoringRequest, error) {
 	var mentoringRequest []request.MentoringRequest
 	for page := 1; true; page++ {
 		requestURL := fmt.Sprintf("%s%s", exercismAPIBasePath, fmt.Sprintf(getMentoringRequestsPath, trackSlug, page))
-		body, err := c.getRequest(requestURL)
+		body, err := client.getRequest(requestURL)
 		if err != nil {
 			return nil, err
 		}
@@ -44,14 +57,14 @@ func (c *ExercismHTTPClient) GetAllMentoringRequests(trackSlug string) ([]reques
 	return mentoringRequest, nil
 }
 
-func (c *ExercismHTTPClient) getRequest(requestURL string) ([]byte, error) {
+func (client *ExercismHTTPClient) getRequest(requestURL string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new request: %w", err)
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.Token))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", client.Token))
 
-	resp, err := c.Client.Do(req)
+	resp, err := client.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
