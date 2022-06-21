@@ -19,6 +19,7 @@ jobs:
      #   run: go build .
       - name: Run linters
         run: |
+          go mod tidy
           go vet ./...
           golint ./...
           test -z $(gofmt -d ./...)
