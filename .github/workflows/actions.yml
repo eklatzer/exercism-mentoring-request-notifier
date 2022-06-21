@@ -1,30 +1,41 @@
 name: go
 
-on: ["push", "pull_request"]
+on: [ "push", "pull_request" ]
 
 jobs:
-  ci  :
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Go
+
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.18'
-      - name: Install dependencies
-        run: |
-          go version
-          go get -u golang.org/x/lint/golint
-     # - name: Run build
-     #   run: go build .
-      - name: Run linters
-        run: |
-          go mod tidy
-          go vet ./...
-          golint ./...
-          test -z $(gofmt -d ./...)
-      - uses: dominikh/staticcheck-action@v1.2.0
-        with:
-          version: "2022.1.1"
-      - name: Run testing
-        run: go test -v ./...
+          go-version: 1.17
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Build
+        run: go build -v .
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+
+      - name: Run staticcheck
+        run: staticcheck ./...
+
+      - name: Install golint
+        run: go install golang.org/x/lint/golint@latest
+
+      - name: Run golint
+        run: golint ./...
+
+   #   - name: Run gofmt
+    #    run: test -z $(gofmt -d ./...)
+
+      - name: Run tests
+        run: go test -race -v ./...
