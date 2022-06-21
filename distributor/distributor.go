@@ -77,38 +77,9 @@ func New(cfg *config.Config, chRequests chan map[string][]request.MentoringReque
 func (d *Distributor) Run() {
 	for currentMentoringRequests := range d.chanRequests {
 		for trackSlug, mentoringRequests := range currentMentoringRequests {
-			for _, req := range mentoringRequests {
-				info, alreadySent := d.distributedRequests[req.UUID]
-				var message = "*New mentoring request*"
-				if alreadySent {
-					message = "*Reminder*"
-				}
-				if alreadySent && time.Since(info.LastSent) < d.remindInterval {
-					continue
-				}
-				messageTimestamp, err := d.sendSlackMessage(d.config.TrackConfig[trackSlug], slack.Attachment{
-					Text: fmt.Sprintf("%s: <%s|Get to request>", message, req.URL),
-					Fields: []slack.AttachmentField{
-						{Title: "Student", Value: req.StudentHandle},
-						{Title: "Exercise", Value: req.ExerciseTitle},
-					},
-					Color: exercismColorCode,
-				})
-				if err != nil {
-					d.log.Error(err)
-					continue
-				}
-				d.log.Info("sent message: ", req.UUID)
-				d.distributedRequests[req.UUID] = requestInfo{
-					Request:  req,
-					LastSent: time.Now(),
-					Messages: append(d.distributedRequests[req.UUID].Messages, messageInfo{
-						ChannelID: d.config.TrackConfig[trackSlug].ChannelID,
-						Timestamp: messageTimestamp,
-					}),
-				}
-			}
+			d.handleRequests(mentoringRequests, trackSlug)
 		}
+
 		errors := d.distributedRequests.CleanUp(currentMentoringRequests, d.slackClient)
 		for _, err := range errors {
 			d.log.Warnf("failed to delete message:%s", err.Error())
@@ -132,6 +103,30 @@ func (d Distributor) StartupCheck() error {
 		}
 	}
 	return nil
+}
+
+func (d Distributor) handleRequests(mentoringRequests []request.MentoringRequest, trackSlug string) {
+	for _, req := range mentoringRequests {
+		info, alreadySent := d.distributedRequests[req.UUID]
+		var message = "*New mentoring request*"
+		if alreadySent {
+			message = "*Reminder*"
+		}
+		if alreadySent && time.Since(info.LastSent) < d.remindInterval {
+			continue
+		}
+		messageTimestamp, err := d.sendSlackMessage(d.config.TrackConfig[trackSlug], slack.Attachment{Text: fmt.Sprintf("%s: <%s|Get to request>", message, req.URL), Fields: []slack.AttachmentField{{Title: "Student", Value: req.StudentHandle}, {Title: "Exercise", Value: req.ExerciseTitle}}, Color: exercismColorCode})
+		if err != nil {
+			d.log.Error(err)
+			continue
+		}
+
+		d.distributedRequests[req.UUID] = requestInfo{
+			Request:  req,
+			LastSent: time.Now(),
+			Messages: append(d.distributedRequests[req.UUID].Messages, messageInfo{ChannelID: d.config.TrackConfig[trackSlug].ChannelID, Timestamp: messageTimestamp}),
+		}
+	}
 }
 
 func (d Distributor) sendSlackMessage(trackConfig config.TrackConfig, attachment slack.Attachment) (string, error) {
