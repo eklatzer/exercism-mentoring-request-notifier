@@ -24,3 +24,6 @@ README.md
 .gitignore
 .git/
 
+# Testcoverage
+cover.out
+
