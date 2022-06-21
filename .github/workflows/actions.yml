@@ -18,14 +18,14 @@ jobs:
         run: |
           go version
           go get -u golang.org/x/lint/golint
-          go install honnef.co/go/tools/cmd/staticcheck@latest
+       #   go install honnef.co/go/tools/cmd/staticcheck@latest
      # - name: Run build
      #   run: go build .
       - name: Run linters
         run: |
           go vet ./...
           golint ./...
-          staticcheck ./...
+        #  staticcheck ./...
           test -z $(gofmt -d ./...)
       - name: Run testing
         run: go test -v ./...
