@@ -10,8 +10,9 @@ type MentoringRequestsResults struct {
 }
 
 type Meta struct {
-	CurrentPage   int `json:"current_page"`
-	TotalCount    int `json:"total_count"`
+	CurrentPage int `json:"current_page"`
+	TotalCount 					 int `json:"total_count"`
+
 	TotalPages    int `json:"total_pages"`
 	UnscopedTotal int `json:"unscoped_total"`
 }
