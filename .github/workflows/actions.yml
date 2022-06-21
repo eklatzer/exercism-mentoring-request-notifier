@@ -1,12 +1,9 @@
 name: go
 
-on:
-  push:
-    branches:
-      - master
+on: ["push", "pull_request"]
 
 jobs:
-  build:
+  ci  :
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -18,14 +15,15 @@ jobs:
         run: |
           go version
           go get -u golang.org/x/lint/golint
-       #   go install honnef.co/go/tools/cmd/staticcheck@latest
      # - name: Run build
      #   run: go build .
       - name: Run linters
         run: |
           go vet ./...
           golint ./...
-        #  staticcheck ./...
           test -z $(gofmt -d ./...)
+      - uses: dominikh/staticcheck-action@v1.2.0
+        with:
+          version: "2022.1.1"
       - name: Run testing
         run: go test -v ./...
