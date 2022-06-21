@@ -1,4 +1,4 @@
-FROM golang:1.16 as build
+FROM golang:1.17 as build
 
 ENV APP_HOME /go/src/exercism-mentoring-request-notifier
 WORKDIR "$APP_HOME"
@@ -8,7 +8,7 @@ RUN go mod download &&\
     go mod verify && \
     go build -x
 
-FROM golang:1.16
+FROM golang:1.17
 
 ENV APP_HOME /go/src/exercism-mentoring-request-notifier
 RUN mkdir -p "$APP_HOME"
