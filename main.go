@@ -6,7 +6,10 @@ import (
 	"exercism-mentoring-request-notifier/distributor"
 	"exercism-mentoring-request-notifier/request"
 	"flag"
+	"fmt"
 	log "github.com/sirupsen/logrus"
+	"os"
+	"path/filepath"
 )
 
 const (
@@ -17,7 +20,13 @@ const (
 func main() {
 	configPath := flag.String("config", defaultConfigPath, "Defines the path to the config")
 	cacheFilePath := flag.String("cache", defaultCachePath, "Defines the path to the cache.json")
+	printVersionInfo := flag.Bool("v", false, "Print the version of the current binary")
 	flag.Parse()
+
+	if *printVersionInfo {
+		log.Println(fmt.Sprintf("%s version %s", filepath.Base(os.Args[0]), versionString()))
+		os.Exit(0)
+	}
 
 	cfg, err := config.ReadConfig(*configPath)
 	if err != nil {
