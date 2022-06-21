@@ -34,8 +34,8 @@ jobs:
       - name: Run golint
         run: golint -set_exit_status ./...
 
-   #   - name: Run gofmt
-    #    run: test -z $(gofmt -d ./...)
+      - name: Run gofmt
+        run: test -z $(gofmt -d ./...)
 
       - name: Run tests
         run: go test -race -v ./...
