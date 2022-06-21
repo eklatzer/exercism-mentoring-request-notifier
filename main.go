@@ -26,16 +26,20 @@ func main() {
 
 	var chMentoringRequests = make(chan map[string][]request.MentoringRequest, 5)
 
+	dist, err := distributor.New(cfg, chMentoringRequests, *cacheFilePath)
+	if err != nil {
+		log.Fatalf("failed to setup distributor: %v", err)
+	}
+	err = dist.StartupCheck()
+	if err != nil {
+		log.Fatalf("startup-check of distributor failed: %s", err.Error())
+	}
+	go dist.Run()
+
 	col, err := collector.New(cfg, chMentoringRequests)
 	if err != nil {
 		log.Fatalf("failed to setup collector: %v", err)
 	}
 
-	go col.Run()
-
-	dist, err := distributor.New(cfg, chMentoringRequests, *cacheFilePath)
-	if err != nil {
-		log.Fatalf("failed to setup distributor: %v", err)
-	}
-	dist.Run()
+	col.Run()
 }

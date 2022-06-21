@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	logFile = "distributor_log.json"
+	logFile           = "distributor_log.json"
+	exercismColorCode = "#604FCD"
 )
 
 type Distributor struct {
@@ -85,7 +86,14 @@ func (d *Distributor) Run() {
 				if alreadySent && time.Since(info.LastSent) < d.remindInterval {
 					continue
 				}
-				messageTimestamp, err := d.sendSlackMessage(req, d.config.TrackConfig[trackSlug], message)
+				messageTimestamp, err := d.sendSlackMessage(d.config.TrackConfig[trackSlug], slack.Attachment{
+					Text: fmt.Sprintf("%s: <%s|Get to request>", message, req.URL),
+					Fields: []slack.AttachmentField{
+						{Title: "Student", Value: req.StudentHandle},
+						{Title: "Exercise", Value: req.ExerciseTitle},
+					},
+					Color: exercismColorCode,
+				})
 				if err != nil {
 					d.log.Error(err)
 					continue
@@ -113,16 +121,20 @@ func (d *Distributor) Run() {
 	}
 }
 
-func (d Distributor) sendSlackMessage(req request.MentoringRequest, trackConfig config.TrackConfig, message string) (string, error) {
-	attachment := slack.Attachment{
-		Text: fmt.Sprintf("%s: <%s|Get to request>", message, req.URL),
-		Fields: []slack.AttachmentField{
-			{Title: "Student", Value: req.StudentHandle},
-			{Title: "Exercise", Value: req.ExerciseTitle},
-		},
-		Color: "#604FCD",
+func (d Distributor) StartupCheck() error {
+	for trackSlug, trackConfig := range d.config.TrackConfig {
+		_, err := d.sendSlackMessage(trackConfig, slack.Attachment{
+			Text:  fmt.Sprintf("Start of mentoring request notifer (Slug: %s)", trackSlug),
+			Color: exercismColorCode,
+		})
+		if err != nil {
+			return err
+		}
 	}
+	return nil
+}
 
+func (d Distributor) sendSlackMessage(trackConfig config.TrackConfig, attachment slack.Attachment) (string, error) {
 	_, messageTimestamp, _, err := d.slackClient.SendMessage(
 		trackConfig.ChannelID,
 		slack.MsgOptionAttachments(attachment),
