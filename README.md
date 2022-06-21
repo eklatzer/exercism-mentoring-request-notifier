@@ -1,5 +1,8 @@
 # Exercism Mentoring Request Notifier
 
+![test](https://github.com/eklatzer/exercism-mentoring-request-notifier/actions/workflows/test.yml/badge.svg)
+![lint and build](https://github.com/eklatzer/exercism-mentoring-request-notifier/actions/workflows/lint.yml/badge.svg)
+
 Sends messages to Slack threads when new mentoring requests are created and also creates a reminder if the mentoring request is not accepted after a while.
 
 ## Build
