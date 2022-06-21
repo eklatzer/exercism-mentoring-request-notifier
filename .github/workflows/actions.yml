@@ -1,0 +1,31 @@
+name: go
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.16'
+      - name: Install dependencies
+        run: |
+          go version
+          go get -u golang.org/x/lint/golint
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+     # - name: Run build
+     #   run: go build .
+      - name: Run linters
+        run: |
+          go vet ./...
+          golint ./...
+          staticcheck ./...
+          test -z $(gofmt -d ./...)
+      - name: Run testing
+        run: go test -v ./...
