@@ -30,6 +30,8 @@ exercism-mentoring-request-notifier [flags]
             Defines the path to the cache.json (default "cache.json")
     -config string
             Defines the path to the config (default "config.json")
+    -v      bool
+            Defines if the version of the current binary should be printed and then exited (default false)
 ````
 
 ## Docker

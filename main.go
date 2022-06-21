@@ -20,7 +20,7 @@ const (
 func main() {
 	configPath := flag.String("config", defaultConfigPath, "Defines the path to the config")
 	cacheFilePath := flag.String("cache", defaultCachePath, "Defines the path to the cache.json")
-	printVersionInfo := flag.Bool("v", false, "Print the version of the current binary and exit")
+	printVersionInfo := flag.Bool("v", false, "Defines if the version of the current binary should be printed and then exited")
 	flag.Parse()
 
 	if *printVersionInfo {
