@@ -8,10 +8,8 @@ import (
 	"exercism-mentoring-request-notifier/logging"
 	"exercism-mentoring-request-notifier/request"
 	"flag"
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
-	"path/filepath"
 )
 
 const (
@@ -26,8 +24,7 @@ func main() {
 	flag.Parse()
 
 	if *printVersionInfo {
-		log.Println(fmt.Sprintf("%s version %s", filepath.Base(os.Args[0]), versionString()))
-		os.Exit(0)
+		printVersionAndExit()
 	}
 
 	var cfg = &config.Config{}
