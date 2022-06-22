@@ -4,6 +4,7 @@ import (
 	"exercism-mentoring-request-notifier/collector"
 	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/distributor"
+	"exercism-mentoring-request-notifier/files"
 	"exercism-mentoring-request-notifier/logging"
 	"exercism-mentoring-request-notifier/request"
 	"flag"
@@ -29,7 +30,9 @@ func main() {
 		os.Exit(0)
 	}
 
-	cfg, err := config.ReadConfig(*configPath)
+	var cfg = &config.Config{}
+
+	err := files.New(os.ReadFile).JSONToStruct(*configPath, cfg)
 	if err != nil {
 		log.Fatalf("failed to read config: %v", err)
 	}
