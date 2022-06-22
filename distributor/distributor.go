@@ -67,7 +67,7 @@ func New(cfg *config.Config, chRequests chan map[string][]request.MentoringReque
 		return nil, err
 	}
 
-	err = files.JSONToStruct(d.cacheFilePath, &d.distributedRequests)
+	err = files.New(os.ReadFile).JSONToStruct(d.cacheFilePath, &d.distributedRequests)
 	if err != nil {
 		return nil, err
 	}

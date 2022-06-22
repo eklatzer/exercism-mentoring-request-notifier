@@ -1,6 +1,9 @@
 package config
 
-import "exercism-mentoring-request-notifier/files"
+import (
+	"exercism-mentoring-request-notifier/files"
+	"os"
+)
 
 type Config struct {
 	LogLevel       string                 `json:"log_level"`
@@ -18,7 +21,7 @@ type TrackConfig struct {
 
 func ReadConfig(path string) (*Config, error) {
 	c := &Config{}
-	err := files.JSONToStruct(path, c)
+	err := files.New(os.ReadFile).JSONToStruct(path, c)
 	if err != nil {
 		return nil, err
 	}
