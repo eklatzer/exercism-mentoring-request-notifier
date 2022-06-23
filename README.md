@@ -40,16 +40,21 @@ exercism-mentoring-request-notifier [flags]
 
 ## Docker
 
+Use the pre-built image:
+```console
+$ docker run -d -v /path/to/config/:/go/src/exercism-mentoring-request-notifier/cfg ghcr.io/eklatzer/exercism-mentoring-request-notifier
+```
+
 Build the image:
 
 ```console
-$ docker build -t exercism-mentoring-request-notifier .
+$ docker build -t <tag> .
 ```
 
 Run container:
 
 ````console
-$ docker run -d -v /path/to/config/:/go/src/exercism-mentoring-request-notifier/cfg exercism-mentoring-request-notifier
+$ docker run -d -v /path/to/config/:/go/src/exercism-mentoring-request-notifier/cfg <tag>
 ````
 
 ## Config

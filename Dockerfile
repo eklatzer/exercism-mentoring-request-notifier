@@ -6,12 +6,13 @@ COPY . .
 
 RUN go mod download &&\
     go mod verify && \
-    go build -x
+    CGO_ENABLED=0 go build -ldflags="-s -w" -x
 
-FROM golang:1.17
+FROM alpine:3.15
+
+LABEL org.opencontainers.image.source="https://github.com/eklatzer/exercism-mentoring-request-notifier"
 
 ENV APP_HOME /go/src/exercism-mentoring-request-notifier
-RUN mkdir -p "$APP_HOME"
 WORKDIR "$APP_HOME"
 
 COPY --from=build "$APP_HOME"/exercism-mentoring-request-notifier $APP_HOME
