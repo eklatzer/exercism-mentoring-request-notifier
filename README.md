@@ -73,3 +73,10 @@ $ docker run -d -v /path/to/config/:/go/src/exercism-mentoring-request-notifier/
   }
 }
 ````
+
+## Slack requirements
+
+To have the full functionality a Slack token has to be provided. Therefore, an app has to be created: [Create a bot for your workspace](https://slack.com/help/articles/115005265703-Create-a-bot-for-your-workspace) </br>
+The needed bot token scopes are:
+* `channels:history`: View messages and other content
+* `chat:write`: Send messages
