@@ -80,12 +80,12 @@ func (d *Distributor) Run() {
 			d.handleRequests(mentoringRequests, trackSlug)
 		}
 
-		errors := d.distributedRequests.CleanUp(currentMentoringRequests, d.slackClient)
+		errors := d.distributedRequests.cleanUp(currentMentoringRequests, d.slackClient)
 		for _, err := range errors {
 			d.log.Warnf("failed to delete message:%s", err.Error())
 		}
 
-		err := d.distributedRequests.SaveToFile(d.cacheFilePath)
+		err := d.distributedRequests.saveToFile(d.cacheFilePath)
 		if err != nil {
 			d.log.Error(err)
 		}
@@ -93,10 +93,11 @@ func (d *Distributor) Run() {
 }
 
 func (d Distributor) StartupCheck() error {
-	for trackSlug, trackConfig := range d.config.TrackConfig {
-		_, err := d.sendSlackMessage(trackConfig, slack.Attachment{
-			Text:  fmt.Sprintf("Start of mentoring request notifer for `%s`", trackSlug),
-			Color: exercismColorCode,
+	for _, trackConfig := range d.config.TrackConfig {
+		_, _, _, err := d.slackClient.GetConversationReplies(&slack.GetConversationRepliesParameters{
+			ChannelID: trackConfig.ChannelID,
+			Timestamp: trackConfig.ThreadTS,
+			Limit:     1,
 		})
 		if err != nil {
 			return err
@@ -115,7 +116,12 @@ func (d Distributor) handleRequests(mentoringRequests []request.MentoringRequest
 		if alreadySent && time.Since(info.LastSent) < d.remindInterval {
 			continue
 		}
-		messageTimestamp, err := d.sendSlackMessage(d.config.TrackConfig[trackSlug], slack.Attachment{Text: fmt.Sprintf("%s: <%s|Get to request>", message, req.URL), Fields: []slack.AttachmentField{{Title: "Student", Value: req.StudentHandle}, {Title: "Exercise", Value: req.ExerciseTitle}}, Color: exercismColorCode})
+
+		_, messageTimestamp, _, err := d.slackClient.SendMessage(
+			d.config.TrackConfig[trackSlug].ChannelID,
+			slack.MsgOptionAttachments(slack.Attachment{Text: fmt.Sprintf("%s: <%s|Get to request>", message, req.URL), Fields: []slack.AttachmentField{{Title: "Student", Value: req.StudentHandle}, {Title: "Exercise", Value: req.ExerciseTitle}}, Color: exercismColorCode}),
+			slack.MsgOptionTS(d.config.TrackConfig[trackSlug].ThreadTS),
+		)
 		if err != nil {
 			d.log.Error(err)
 			continue
@@ -129,16 +135,7 @@ func (d Distributor) handleRequests(mentoringRequests []request.MentoringRequest
 	}
 }
 
-func (d Distributor) sendSlackMessage(trackConfig config.TrackConfig, attachment slack.Attachment) (string, error) {
-	_, messageTimestamp, _, err := d.slackClient.SendMessage(
-		trackConfig.ChannelID,
-		slack.MsgOptionAttachments(attachment),
-		slack.MsgOptionTS(trackConfig.ThreadTS),
-	)
-	return messageTimestamp, err
-}
-
-func (d distributedRequestCache) CleanUp(currentRequest map[string][]request.MentoringRequest, slackClient *slack.Client) []error {
+func (d distributedRequestCache) cleanUp(currentRequest map[string][]request.MentoringRequest, slackClient *slack.Client) []error {
 	var errors []error
 outerLoop:
 	for _, alreadyDistributedRequest := range d {
@@ -167,12 +164,12 @@ func (r requestInfo) deleteMessages(client *slack.Client) []error {
 	return errors
 }
 
-func (d distributedRequestCache) SaveToFile(cacheFilePath string) error {
+func (d distributedRequestCache) saveToFile(cacheFilePath string) error {
 	file, err := json.Marshal(d)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(cacheFilePath, file, 0644)
+	return os.WriteFile(cacheFilePath, file, 0644)
 }
 
 func createCacheFileIfNotExists(cacheFilePath string) error {
