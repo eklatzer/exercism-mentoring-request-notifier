@@ -7,7 +7,6 @@ if [[ -z "$package" ]]; then
 fi
 
 platforms=(
-    "darwin/386"
     "darwin/amd64"
     "linux/386"
     "linux/amd64"
@@ -19,7 +18,7 @@ platforms=(
 )
 
 echo "> re-creating bin-folder"
-rm -r bin
+rm -rf bin
 mkdir bin
 
 echo "> building package ${package}"
