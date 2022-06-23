@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 )
 
-const VersionMajor = 0
+const versionMajor = 0
 
-const VersionMinor = 1
+const versionMinor = 1
 
-const VersionPatch = 0
+const versionPatch = 0
 
 func printVersionAndExit() {
 	log.Println(fmt.Sprintf("%s version %s", filepath.Base(os.Args[0]), versionString()))
@@ -19,5 +19,5 @@ func printVersionAndExit() {
 }
 
 func versionString() string {
-	return fmt.Sprintf("%d.%d.%d", VersionMajor, VersionMinor, VersionPatch)
+	return fmt.Sprintf("%d.%d.%d", versionMajor, versionMinor, versionPatch)
 }

@@ -19,6 +19,7 @@ const (
 	exercismColorCode = "#604FCD"
 )
 
+//Distributor is used to distribute the infos to Slack
 type Distributor struct {
 	config              *config.Config
 	chanRequests        chan map[string][]request.MentoringRequest
@@ -42,6 +43,7 @@ type messageInfo struct {
 	Timestamp string `json:"timestamp"`
 }
 
+//New returns an instance of Distributor
 func New(cfg *config.Config, chRequests chan map[string][]request.MentoringRequest, cacheFilePath string) (*Distributor, error) {
 	var d = &Distributor{
 		config:              cfg,
@@ -74,6 +76,7 @@ func New(cfg *config.Config, chRequests chan map[string][]request.MentoringReque
 	return d, err
 }
 
+//Run runs the Distributor and forwards the mentoring requests from the Collector to Slack
 func (d *Distributor) Run() {
 	for currentMentoringRequests := range d.chanRequests {
 		for trackSlug, mentoringRequests := range currentMentoringRequests {
@@ -92,6 +95,7 @@ func (d *Distributor) Run() {
 	}
 }
 
+//StartupCheck checks if all given Slack infos are valid (channel-infos)
 func (d Distributor) StartupCheck() error {
 	for _, trackConfig := range d.config.TrackConfig {
 		_, _, _, err := d.slackClient.GetConversationReplies(&slack.GetConversationRepliesParameters{

@@ -14,15 +14,17 @@ const (
 	getMentoringRequestsPath = "/mentoring/requests?track_slug=%s&order=recent&page=%d"
 )
 
+//ExercismHTTPClient is a http client with a token to communicate with the Exercism API
 type ExercismHTTPClient struct {
-	Client HTTPClient
+	Client httpClient
 	Token  string
 }
 
-type HTTPClient interface {
+type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
+//GetMentoringRequestsForAllTracks collects the current mentoring requests for the given tracks
 func (client *ExercismHTTPClient) GetMentoringRequestsForAllTracks(trackConfig map[string]config.TrackConfig) (map[string][]request.MentoringRequest, error) {
 	var results = map[string][]request.MentoringRequest{}
 	for trackSlug := range trackConfig {

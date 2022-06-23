@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 )
 
+//SetupLogging sets up the default logging
 func SetupLogging(log *logrus.Logger, logLevel, logfileName string) error {
 	log.SetFormatter(&logrus.JSONFormatter{})
 

@@ -4,11 +4,14 @@ import (
 	"time"
 )
 
+//MentoringRequestsResults represents the complete response when requesting mentoring requests
+// at the Exercism API
 type MentoringRequestsResults struct {
 	MentoringRequests []MentoringRequest `json:"results"`
 	Meta              Meta               `json:"meta"`
 }
 
+//Meta represents the meta data at the Exercism API
 type Meta struct {
 	CurrentPage int `json:"current_page"`
 	TotalCount  int `json:"total_count"`
@@ -17,6 +20,7 @@ type Meta struct {
 	UnscopedTotal int `json:"unscoped_total"`
 }
 
+//MentoringRequest represents one mentoring request at the Exercism API
 type MentoringRequest struct {
 	UUID                   string      `json:"uuid"`
 	TrackTitle             string      `json:"track_title"`
