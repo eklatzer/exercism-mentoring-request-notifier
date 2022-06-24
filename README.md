@@ -3,6 +3,7 @@
 ![test](https://github.com/eklatzer/exercism-mentoring-request-notifier/actions/workflows/test.yml/badge.svg)
 ![lint](https://github.com/eklatzer/exercism-mentoring-request-notifier/actions/workflows/lint.yml/badge.svg)
 ![build](https://github.com/eklatzer/exercism-mentoring-request-notifier/actions/workflows/build.yml/badge.svg)
+[![codecov](https://codecov.io/gh/eklatzer/exercism-mentoring-request-notifier/branch/master/graph/badge.svg?token=S8X3BI4QCN)](https://codecov.io/gh/eklatzer/exercism-mentoring-request-notifier)
 
 Sends messages to Slack threads when new mentoring requests are created and also creates a reminder if the mentoring request is not accepted after a while.
 
