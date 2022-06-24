@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/files"
-	"exercism-mentoring-request-notifier/logging"
 	"exercism-mentoring-request-notifier/request"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
-	"io/ioutil"
 	"os"
 	"time"
 )
@@ -25,7 +23,7 @@ type Distributor struct {
 	chanRequests        chan map[string][]request.MentoringRequest
 	log                 *logrus.Logger
 	distributedRequests distributedRequestCache
-	slackClient         *slack.Client
+	slackClient         slackClient
 	cacheFilePath       string
 	remindInterval      time.Duration
 }
@@ -43,8 +41,14 @@ type messageInfo struct {
 	Timestamp string `json:"timestamp"`
 }
 
+type slackClient interface {
+	SendMessage(channel string, options ...slack.MsgOption) (string, string, string, error)
+	GetConversationReplies(params *slack.GetConversationRepliesParameters) (msgs []slack.Message, hasMore bool, nextCursor string, err error)
+	DeleteMessage(channel, messageTimestamp string) (string, string, error)
+}
+
 //New returns an instance of Distributor
-func New(cfg *config.Config, chRequests chan map[string][]request.MentoringRequest, cacheFilePath string) (*Distributor, error) {
+func New(cfg *config.Config, chRequests chan map[string][]request.MentoringRequest, cacheFilePath string, setupLogging func(logger *logrus.Logger, level, path string) error) (*Distributor, error) {
 	var d = &Distributor{
 		config:              cfg,
 		chanRequests:        chRequests,
@@ -54,7 +58,7 @@ func New(cfg *config.Config, chRequests chan map[string][]request.MentoringReque
 		cacheFilePath:       cacheFilePath,
 	}
 
-	err := logging.SetupLogging(d.log, cfg.LogLevel, logFile)
+	err := setupLogging(d.log, cfg.LogLevel, logFile)
 	if err != nil {
 		return nil, err
 	}
@@ -64,16 +68,15 @@ func New(cfg *config.Config, chRequests chan map[string][]request.MentoringReque
 		return nil, err
 	}
 
-	err = createCacheFileIfNotExists(cacheFilePath)
-	if err != nil {
-		return nil, err
-	}
+	return d, nil
+}
 
-	err = files.New(os.ReadFile).JSONToStruct(d.cacheFilePath, &d.distributedRequests)
-	if err != nil {
-		return nil, err
+//ReadCacheIfExists reads the cache from d.cacheFilePath if exists
+func (d *Distributor) ReadCacheIfExists(stat func(name string) (os.FileInfo, error), readFile func(string) ([]byte, error)) error {
+	if _, err := stat(d.cacheFilePath); err == nil {
+		return files.New(readFile).JSONToStruct(d.cacheFilePath, &d.distributedRequests)
 	}
-	return d, err
+	return nil
 }
 
 //Run runs the Distributor and forwards the mentoring requests from the Collector to Slack
@@ -139,7 +142,7 @@ func (d Distributor) handleRequests(mentoringRequests []request.MentoringRequest
 	}
 }
 
-func (d distributedRequestCache) cleanUp(currentRequest map[string][]request.MentoringRequest, slackClient *slack.Client) []error {
+func (d distributedRequestCache) cleanUp(currentRequest map[string][]request.MentoringRequest, slackClient slackClient) []error {
 	var errors []error
 outerLoop:
 	for _, alreadyDistributedRequest := range d {
@@ -157,7 +160,7 @@ outerLoop:
 	return errors
 }
 
-func (r requestInfo) deleteMessages(client *slack.Client) []error {
+func (r requestInfo) deleteMessages(client slackClient) []error {
 	var errors []error
 	for _, message := range r.Messages {
 		_, _, err := client.DeleteMessage(message.ChannelID, message.Timestamp)
@@ -174,20 +177,4 @@ func (d distributedRequestCache) saveToFile(cacheFilePath string) error {
 		return err
 	}
 	return os.WriteFile(cacheFilePath, file, 0644)
-}
-
-func createCacheFileIfNotExists(cacheFilePath string) error {
-	_, err := os.Stat(cacheFilePath)
-	if os.IsNotExist(err) {
-		marshal, err := json.Marshal(distributedRequestCache{})
-		if err != nil {
-			return err
-		}
-
-		err = ioutil.WriteFile(cacheFilePath, marshal, 0644)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }

@@ -36,9 +36,13 @@ func main() {
 
 	var chMentoringRequests = make(chan map[string][]request.MentoringRequest, 5)
 
-	dist, err := distributor.New(cfg, chMentoringRequests, *cacheFilePath)
+	dist, err := distributor.New(cfg, chMentoringRequests, *cacheFilePath, logging.SetupLogging)
 	if err != nil {
 		log.Fatalf("failed to setup distributor: %v", err)
+	}
+	err = dist.ReadCacheIfExists(os.Stat, os.ReadFile)
+	if err != nil {
+		log.Fatalf(err.Error())
 	}
 	err = dist.StartupCheck()
 	if err != nil {
