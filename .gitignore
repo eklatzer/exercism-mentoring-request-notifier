@@ -17,9 +17,6 @@ log/
 # Cache
 cache.json
 
-# README
-README.md
-
 # Git
 .gitignore
 .git/
