@@ -1,13 +1,14 @@
 package client
 
 import (
-	"exercism-mentoring-request-notifier/config"
-	"exercism-mentoring-request-notifier/request"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"testing"
+
+	"exercism-mentoring-request-notifier/config"
+	"exercism-mentoring-request-notifier/request"
+	"github.com/stretchr/testify/assert"
 )
 
 type mockClient struct {

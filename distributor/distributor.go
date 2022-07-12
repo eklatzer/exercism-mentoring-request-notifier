@@ -2,14 +2,15 @@ package distributor
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
+	"time"
+
 	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/files"
 	"exercism-mentoring-request-notifier/request"
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
-	"os"
-	"time"
 )
 
 const (

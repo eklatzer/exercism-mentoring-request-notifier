@@ -3,11 +3,12 @@ package client
 import (
 	"encoding/json"
 	"errors"
-	"exercism-mentoring-request-notifier/request"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	"exercism-mentoring-request-notifier/request"
 )
 
 var testCasesGetMentoringRequestsForAllTracks = []struct {

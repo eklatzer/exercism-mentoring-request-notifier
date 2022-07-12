@@ -2,11 +2,12 @@ package client
 
 import (
 	"encoding/json"
-	"exercism-mentoring-request-notifier/config"
-	"exercism-mentoring-request-notifier/request"
 	"fmt"
 	"io"
 	"net/http"
+
+	"exercism-mentoring-request-notifier/config"
+	"exercism-mentoring-request-notifier/request"
 )
 
 const (

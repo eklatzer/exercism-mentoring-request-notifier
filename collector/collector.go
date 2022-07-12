@@ -1,12 +1,13 @@
 package collector
 
 import (
+	"net/http"
+	"time"
+
 	"exercism-mentoring-request-notifier/collector/client"
 	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/request"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"time"
 )
 
 const (

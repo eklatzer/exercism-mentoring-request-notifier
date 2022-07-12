@@ -1,11 +1,12 @@
 package collector
 
 import (
+	"testing"
+
 	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/request"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestNew(t *testing.T) {

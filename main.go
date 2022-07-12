@@ -1,15 +1,16 @@
 package main
 
 import (
+	"flag"
+	"os"
+
 	"exercism-mentoring-request-notifier/collector"
 	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/distributor"
 	"exercism-mentoring-request-notifier/files"
 	"exercism-mentoring-request-notifier/logging"
 	"exercism-mentoring-request-notifier/request"
-	"flag"
 	log "github.com/sirupsen/logrus"
-	"os"
 )
 
 const (

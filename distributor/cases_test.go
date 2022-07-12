@@ -2,6 +2,7 @@ package distributor
 
 import (
 	"errors"
+
 	"exercism-mentoring-request-notifier/config"
 )
 

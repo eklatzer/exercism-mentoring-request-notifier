@@ -1,13 +1,14 @@
 package distributor
 
 import (
+	"os"
+	"testing"
+
 	"exercism-mentoring-request-notifier/config"
 	"exercism-mentoring-request-notifier/request"
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 func TestNew(t *testing.T) {

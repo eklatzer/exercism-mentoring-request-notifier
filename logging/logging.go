@@ -1,9 +1,10 @@
 package logging
 
 import (
-	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
+
+	"github.com/sirupsen/logrus"
 )
 
 //SetupLogging sets up the default logging
