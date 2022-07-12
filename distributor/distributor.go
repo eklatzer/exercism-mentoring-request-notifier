@@ -101,15 +101,16 @@ func (d *Distributor) Run() {
 
 //StartupCheck checks if all given Slack infos are valid (channel-infos)
 func (d Distributor) StartupCheck() error {
-	for _, trackConfig := range d.config.TrackConfig {
+	for trackSlug, trackConfig := range d.config.TrackConfig {
 		_, _, _, err := d.slackClient.GetConversationReplies(&slack.GetConversationRepliesParameters{
 			ChannelID: trackConfig.ChannelID,
 			Timestamp: trackConfig.ThreadTS,
 			Limit:     1,
 		})
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to get conversation replies for channel %s, thread %s, track %s:%w", trackConfig.ChannelID, trackConfig.ThreadTS, trackSlug, err)
 		}
+		time.Sleep(500 * time.Millisecond)
 	}
 	return nil
 }
